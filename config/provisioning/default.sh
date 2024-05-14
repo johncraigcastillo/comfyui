@@ -23,6 +23,7 @@ CHECKPOINT_MODELS=(
 )
 
 LORA_MODELS=(
+    "https://civitai.com/api/download/models/28943"
     #"https://civitai.com/api/download/models/16576"
 )
 
