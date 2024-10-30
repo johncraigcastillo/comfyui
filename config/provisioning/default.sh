@@ -6,13 +6,6 @@
 
 # Packages are installed after nodes so we can fix them...
 
-# Declare an associative array for custom filenames
-declare -A CHECKPOINT_NAMES=(
-    ["https://civitai.com/api/download/models/502362"]="Aziib_PixelMix_XL.safetensors"
-    ["https://civitai.com/api/download/models/222710"]="Aziib_PixelMix_Fast.safetensors"
-    ["https://huggingface.co/megaaziib/aziibpixelmix/resolve/main/AziibPixelMix_Full.safetensors"]="AziibPixelMix_Full.safetensors"
-)
-
 PYTHON_PACKAGES=(
     #"opencv-python==4.7.0.72"
 )
@@ -21,24 +14,19 @@ NODES=(
     "https://github.com/ltdrdata/ComfyUI-Manager"
 )
 
-
 CHECKPOINT_MODELS=(
     # "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.ckpt"
     "https://huggingface.co/megaaziib/aziibpixelmix/resolve/main/AziibPixelMix_Full.safetensors"
-    #Aziib_PixelMix XL
-    "https://civitai.com/api/download/models/502362" 
-    #Aziib PixelMix Fast
-    "https://civitai.com/api/download/models/222710" 
+    "https://civitai.com/api/download/models/502362" #Aziib_PixelMix XL 
+    "https://civitai.com/api/download/models/222710" #Aziib PixelMix Fast
     #"https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt"
     #"https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors"
     #"https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0.safetensors"
 )
 
-
 LORA_MODELS=(
     #"https://civitai.com/api/download/models/16576"
-    #Game Boy Palette Aziib
-    "https://civitai.com/api/download/models/250139" 
+    "https://civitai.com/api/download/models/250139" #Game Boy Palette Aziib
 )
 
 VAE_MODELS=(
@@ -144,15 +132,11 @@ function provisioning_get_models() {
     
     printf "Downloading %s model(s) to %s...\n" "${#arr[@]}" "$dir"
     for url in "${arr[@]}"; do
-        # Check if there's a custom name for the URL in the dictionary
-        filename="${CHECKPOINT_NAMES[$url]:-${url##*/}}"
-        
-        printf "Downloading: %s as %s\n" "${url}" "${filename}"
-        provisioning_download "${url}" "${dir}" "${filename}"
+        printf "Downloading: %s\n" "${url}"
+        provisioning_download "${url}" "${dir}"
         printf "\n"
     done
 }
-
 
 function provisioning_print_header() {
     printf "\n##############################################\n#                                            #\n#          Provisioning container            #\n#                                            #\n#         This will take some time           #\n#                                            #\n# Your container will be ready on completion #\n#                                            #\n##############################################\n\n"
@@ -165,10 +149,9 @@ function provisioning_print_end() {
     printf "\nProvisioning complete:  Web UI will start now\n\n"
 }
 
-# Download from $1 URL to $2 file path, using $3 as the filename
+# Download from $1 URL to $2 file path
 function provisioning_download() {
-    wget -qnc --content-disposition --show-progress -O "$2/$3" -e dotbytes="${4:-4M}" "$1"
+    wget -qnc --content-disposition --show-progress -e dotbytes="${3:-4M}" -P "$2" "$1"
 }
-
 
 provisioning_start
