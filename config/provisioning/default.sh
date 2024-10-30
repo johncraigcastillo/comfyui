@@ -131,12 +131,23 @@ function provisioning_get_models() {
     fi
     
     printf "Downloading %s model(s) to %s...\n" "${#arr[@]}" "$dir"
-    for url in "${arr[@]}"; do
-        printf "Downloading: %s\n" "${url}"
-        provisioning_download "${url}" "${dir}"
+    for i in "${!arr[@]}"; do
+        url="${arr[$i]}"
+        
+        # Check if URL already has a filename (contains .safetensors or .ckpt)
+        if [[ "$url" =~ \.safetensors$|\.ckpt$ ]]; then
+            filename="${url##*/}"  # Extract filename from URL
+        else
+            # Use custom name from CHECKPOINT_NAMES
+            filename="${CHECKPOINT_NAMES[$i]}"
+        fi
+        
+        printf "Downloading: %s as %s\n" "${url}" "${filename}"
+        provisioning_download "${url}" "${dir}" "${filename}"
         printf "\n"
     done
 }
+
 
 function provisioning_print_header() {
     printf "\n##############################################\n#                                            #\n#          Provisioning container            #\n#                                            #\n#         This will take some time           #\n#                                            #\n# Your container will be ready on completion #\n#                                            #\n##############################################\n\n"
@@ -151,7 +162,8 @@ function provisioning_print_end() {
 
 # Download from $1 URL to $2 file path
 function provisioning_download() {
-    wget -qnc --content-disposition --show-progress -e dotbytes="${3:-4M}" -P "$2" "$1"
+    wget -qnc --content-disposition --show-progress -O "$2/$3" -e dotbytes="${4:-4M}" "$1"
 }
+
 
 provisioning_start
