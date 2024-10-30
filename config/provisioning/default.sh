@@ -6,6 +6,13 @@
 
 # Packages are installed after nodes so we can fix them...
 
+# Declare an associative array for custom filenames
+declare -A CHECKPOINT_NAMES=(
+    ["https://civitai.com/api/download/models/502362"]="Aziib_PixelMix_XL.safetensors"
+    ["https://civitai.com/api/download/models/222710"]="Aziib_PixelMix_Fast.safetensors"
+    ["https://huggingface.co/megaaziib/aziibpixelmix/resolve/main/AziibPixelMix_Full.safetensors"]="AziibPixelMix_Full.safetensors"
+)
+
 PYTHON_PACKAGES=(
     #"opencv-python==4.7.0.72"
 )
@@ -136,16 +143,9 @@ function provisioning_get_models() {
     fi
     
     printf "Downloading %s model(s) to %s...\n" "${#arr[@]}" "$dir"
-    for i in "${!arr[@]}"; do
-        url="${arr[$i]}"
-        
-        # Check if URL already has a filename (contains .safetensors or .ckpt)
-        if [[ "$url" =~ \.safetensors$|\.ckpt$ ]]; then
-            filename="${url##*/}"  # Extract filename from URL
-        else
-            # Use custom name from CHECKPOINT_NAMES
-            filename="${CHECKPOINT_NAMES[$i]}"
-        fi
+    for url in "${arr[@]}"; do
+        # Check if there's a custom name for the URL in the dictionary
+        filename="${CHECKPOINT_NAMES[$url]:-${url##*/}}"
         
         printf "Downloading: %s as %s\n" "${url}" "${filename}"
         provisioning_download "${url}" "${dir}" "${filename}"
@@ -165,7 +165,7 @@ function provisioning_print_end() {
     printf "\nProvisioning complete:  Web UI will start now\n\n"
 }
 
-# Download from $1 URL to $2 file path
+# Download from $1 URL to $2 file path, using $3 as the filename
 function provisioning_download() {
     wget -qnc --content-disposition --show-progress -O "$2/$3" -e dotbytes="${4:-4M}" "$1"
 }
